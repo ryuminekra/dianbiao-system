@@ -274,13 +274,16 @@ const MeterOverviewPage: React.FC = () => {
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
-                          data={areaStats}
+                          data={areaStats.map(area => ({
+                            ...area,
+                            name: area.area
+                          }))}
                           cx="50%"
                           cy="50%"
                           labelLine={true}
                           label={(props) => {
                             const { payload } = props;
-                            return `${payload.area}: ${payload.percentage.toFixed(2)}%`;
+                            return `${payload.name}: ${payload.percentage.toFixed(2)}%`;
                           }}
                           outerRadius={80}
                           fill="#8884d8"
