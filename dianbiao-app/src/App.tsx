@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Layout, Menu, Button, Dropdown, message } from 'antd';
-import { LogoutOutlined, HomeOutlined, SettingOutlined, DashboardOutlined, AppstoreOutlined } from '@ant-design/icons';
+import { Layout, Menu, Button, message } from 'antd';
+import { LogoutOutlined, SettingOutlined, DashboardOutlined, AppstoreOutlined, UserOutlined, LockOutlined, SaveOutlined, FileTextOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
@@ -11,6 +11,11 @@ import HardwareManagementPage from './pages/HardwareManagementPage';
 import ElectricityPricePage from './pages/ElectricityPricePage';
 import MeterOverviewPage from './pages/MeterOverviewPage';
 import MeterDetailPage from './pages/MeterDetailPage';
+import UserProfilePage from './pages/UserProfilePage';
+import UserManagementPage from './pages/UserManagementPage';
+import ManualMeterReadingPage from './pages/ManualMeterReadingPage';
+import AreaSettingPage from './pages/AreaSettingPage';
+import SystemLogPage from './pages/SystemLogPage';
 
 const { Header, Sider, Content } = Layout;
 
@@ -74,18 +79,43 @@ function App() {
   // 主布局组件
   const MainLayout = ({ children }: { children: React.ReactNode }) => {
     return (
-      <Layout style={{ minHeight: '100vh' }}>
-        <Header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fff', padding: '0 24px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }}>
-          <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#1890ff' }}>远程抄电表系统</div>
+      <Layout style={{ minHeight: '100vh', width: '100%' }}>
+        <Header style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between', 
+          background: '#fff', 
+          padding: '0 24px', 
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+          flexShrink: 0
+        }}>
+          <div style={{ 
+            fontWeight: 'bold', 
+            color: '#1890ff',
+            fontSize: 'clamp(16px, 2vw, 24px)'
+          }}>远程抄电表系统</div>
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <span style={{ marginRight: '16px' }}>欢迎, {currentUser?.username}</span>
+            <span style={{ marginRight: '16px', fontSize: 'clamp(14px, 1vw, 16px)' }}>欢迎, {currentUser?.username}</span>
             <Button type="text" icon={<LogoutOutlined />} onClick={handleLogout}>
               退出登录
             </Button>
           </div>
         </Header>
-        <Layout>
-          <Sider width={200} style={{ background: '#fff' }} collapsible collapsed={collapsed} onCollapse={setCollapsed}>
+        <Layout style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
+          <Sider 
+            width={200} 
+            style={{ 
+              background: '#fff', 
+              flexShrink: 0,
+              minWidth: 'auto'
+            }} 
+            collapsible 
+            collapsed={collapsed} 
+            onCollapse={setCollapsed}
+            breakpoint="lg"
+            collapsedWidth={80}
+            theme="light"
+          >
             <Menu
               mode="inline"
               defaultSelectedKeys={['overview']}
@@ -103,15 +133,54 @@ function App() {
                   disabled: currentUser?.role !== 'admin'
                 },
                 {
+                  key: 'manual',
+                  icon: <SaveOutlined />,
+                  label: <a href="/manual">手动录入电表度数</a>
+                },
+                {
+                  key: 'area',
+                  icon: <SettingOutlined />,
+                  label: <a href="/area">区域设置</a>,
+                  disabled: currentUser?.role !== 'admin'
+                },
+                {
                   key: 'price',
                   icon: <SettingOutlined />,
                   label: <a href="/price">电价设置</a>,
+                  disabled: currentUser?.role !== 'admin'
+                },
+                {
+                  key: 'user',
+                  icon: <UserOutlined />,
+                  label: <a href="/user/profile">个人资料</a>
+                },
+                {
+                  key: 'users',
+                  icon: <LockOutlined />,
+                  label: <a href="/users">用户管理</a>,
+                  disabled: currentUser?.role !== 'admin'
+                },
+                {
+                  key: 'logs',
+                  icon: <FileTextOutlined />,
+                  label: <a href="/logs">系统日志</a>,
                   disabled: currentUser?.role !== 'admin'
                 }
               ]}
             />
           </Sider>
-          <Content style={{ margin: '16px', padding: '24px', background: '#fff', minHeight: 280, borderRadius: '8px' }}>
+          <Content style={{ 
+            margin: '16px', 
+            padding: '24px', 
+            background: '#fff', 
+            minHeight: 280, 
+            maxHeight: 'calc(100vh - 120px)',
+            borderRadius: '8px', 
+            overflow: 'auto', 
+            flex: 1,
+            maxWidth: collapsed ? 'calc(100vw - 128px)' : 'calc(100vw - 248px)',
+            width: '100%'
+          }}>
             {children}
           </Content>
         </Layout>
@@ -162,6 +231,56 @@ function App() {
               <ProtectedRoute>
                 <MainLayout>
                   <MeterDetailPage />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/user/profile"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <UserProfilePage />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/users"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <MainLayout>
+                  <UserManagementPage />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/manual"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <ManualMeterReadingPage />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/area"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <MainLayout>
+                  <AreaSettingPage />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/logs"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <MainLayout>
+                  <SystemLogPage />
                 </MainLayout>
               </ProtectedRoute>
             }

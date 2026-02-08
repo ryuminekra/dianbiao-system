@@ -6,6 +6,58 @@
   overflow: hidden;
 }
 
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .ant-layout-content {
+    margin: 8px !important;
+    padding: 16px !important;
+    max-height: calc(100vh - 100px) !important;
+  }
+  
+  .ant-layout-sider {
+    position: fixed !important;
+    z-index: 10 !important;
+    height: 100vh !important;
+  }
+  
+  .ant-layout-header {
+    padding: 0 16px !important;
+  }
+  
+  .ant-statistic-title {
+    font-size: 14px !important;
+  }
+  
+  .ant-statistic-content {
+    font-size: 20px !important;
+  }
+  
+  .ant-table {
+    font-size: 12px !important;
+  }
+  
+  .ant-table-thead > tr > th {
+    padding: 8px !important;
+  }
+  
+  .ant-table-tbody > tr > td {
+    padding: 8px !important;
+  }
+  
+  .ant-btn {
+    font-size: 12px !important;
+    padding: 4px 12px !important;
+  }
+  
+  .ant-select {
+    width: 150px !important;
+  }
+  
+  .ant-picker {
+    width: 200px !important;
+  }
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;

@@ -84,4 +84,65 @@ router.get('/users', verifyToken, verifyAdmin, async (req, res) => {
   }
 });
 
+// 更新用户资料
+router.put('/profile', verifyToken, async (req, res) => {
+  try {
+    const { avatar } = req.body;
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: '用户不存在' });
+    }
+    if (avatar) {
+      user.avatar = avatar;
+    }
+    await user.save();
+    res.json({ _id: user._id, username: user.username, role: user.role, avatar: user.avatar });
+  } catch (error) {
+    res.status(500).json({ message: '服务器错误' });
+  }
+});
+
+// 修改用户密码
+router.put('/password', verifyToken, async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: '用户不存在' });
+    }
+    // 验证旧密码
+    const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: '旧密码错误' });
+    }
+    // 哈希新密码
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    user.password = hashedPassword;
+    await user.save();
+    res.json({ message: '密码修改成功' });
+  } catch (error) {
+    res.status(500).json({ message: '服务器错误' });
+  }
+});
+
+// 更新用户角色（仅管理员）
+router.put('/users/:id/role', verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const { role } = req.body;
+    if (!role || !['admin', 'user'].includes(role)) {
+      return res.status(400).json({ message: '无效的角色' });
+    }
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: '用户不存在' });
+    }
+    user.role = role;
+    await user.save();
+    res.json({ _id: user._id, username: user.username, role: user.role, avatar: user.avatar });
+  } catch (error) {
+    res.status(500).json({ message: '服务器错误' });
+  }
+});
+
 module.exports = router;

@@ -6,13 +6,32 @@ const deviceSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  area_id: {
+    type: String,
+    required: true
+  },
   area: {
     type: String,
     required: true
   },
-  address: {
+  floor_id: {
     type: String,
     required: true
+  },
+  floor: {
+    type: String,
+    required: true
+  },
+  room_id: {
+    type: String,
+    required: true
+  },
+  room: {
+    type: String,
+    required: true
+  },
+  remark: {
+    type: String
   },
   created_at: {
     type: Date,
@@ -25,9 +44,8 @@ const deviceSchema = new mongoose.Schema({
 });
 
 // 更新updated_at字段
-deviceSchema.pre('save', function(next) {
+deviceSchema.pre('save', function() {
   this.updated_at = Date.now();
-  next();
 });
 
 const Device = mongoose.model('Device', deviceSchema);

@@ -5,6 +5,12 @@ const electricityPriceSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  floor: {
+    type: String
+  },
+  room: {
+    type: String
+  },
   price: {
     type: Number,
     required: true
@@ -24,9 +30,8 @@ const electricityPriceSchema = new mongoose.Schema({
 });
 
 // 更新updated_at字段
-electricityPriceSchema.pre('save', function(next) {
+electricityPriceSchema.pre('save', function() {
   this.updated_at = Date.now();
-  next();
 });
 
 const ElectricityPrice = mongoose.model('ElectricityPrice', electricityPriceSchema);

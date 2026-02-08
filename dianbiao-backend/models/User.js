@@ -15,6 +15,10 @@ const userSchema = new mongoose.Schema({
     enum: ['admin', 'user'],
     default: 'user'
   },
+  avatar: {
+    type: String,
+    default: ''
+  },
   created_at: {
     type: Date,
     default: Date.now
@@ -26,9 +30,8 @@ const userSchema = new mongoose.Schema({
 });
 
 // 更新updated_at字段
-userSchema.pre('save', function(next) {
+userSchema.pre('save', function() {
   this.updated_at = Date.now();
-  next();
 });
 
 const User = mongoose.model('User', userSchema);

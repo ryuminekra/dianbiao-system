@@ -4,9 +4,9 @@ import { ReloadOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import * as echarts from 'echarts';
+import dayjs from 'dayjs';
 
 const { Title, Text } = Typography;
-const { RangePicker } = DatePicker;
 
 interface Metric {
   _id: string;
@@ -46,8 +46,11 @@ const MeterDetailPage: React.FC = () => {
     try {
       const response = await axios.get(`http://localhost:5000/api/devices/${deviceId}`);
       setDeviceInfo(response.data);
-    } catch (error) {
-      message.error('获取设备信息失败');
+    } catch (error: any) {
+      console.error('获取设备信息失败:', error);
+      message.error(error.response?.data?.message || '获取设备信息失败');
+      // 即使出错也确保页面能够正常显示
+      setDeviceInfo({ device_id: '未知', area: '未知', address: '未知' });
     }
   };
 
@@ -60,10 +63,30 @@ const MeterDetailPage: React.FC = () => {
       const response = await axios.get(`http://localhost:5000/api/metrics/monthly/${deviceId}`, {
         params: { month: selectedMonth }
       });
-      setMonthlyData(response.data);
-      updateChart(response.data.data);
-    } catch (error) {
-      message.error('获取月度数据失败');
+      const data = response.data;
+      
+      // 确保数据格式正确
+      const formattedData = {
+        usage: Number(data.usage),
+        cost: Number(data.cost),
+        price: Number(data.price),
+        data: (data.data || []).map((item: any) => ({
+          _id: String(item._id),
+          device_id: String(item.device_id),
+          value: Number(item.value),
+          timestamp: item.timestamp,
+          month: item.month
+        }))
+      };
+      
+      setMonthlyData(formattedData);
+      updateChart(formattedData.data);
+    } catch (error: any) {
+      console.error('获取月度数据失败:', error);
+      message.error(error.response?.data?.message || '获取月度数据失败');
+      // 即使出错也确保页面能够正常显示
+      setMonthlyData({ usage: 0, cost: 0, price: 0, data: [] });
+      updateChart([]);
     } finally {
       setLoading(false);
     }
@@ -192,7 +215,7 @@ const MeterDetailPage: React.FC = () => {
             <DatePicker 
               picker="month" 
               format="YYYY-MM" 
-              value={selectedMonth ? new Date(selectedMonth + '-01') : null}
+              value={selectedMonth ? dayjs(selectedMonth + '-01') : null}
               onChange={handleMonthChange}
             />
           </Space>

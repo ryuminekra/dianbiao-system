@@ -19,6 +19,10 @@ const verifyToken = (req, res, next) => {
 
 // 验证管理员权限
 const verifyAdmin = (req, res, next) => {
+  console.log('验证管理员权限:', req.user);
+  if (!req.user) {
+    return res.status(401).json({ message: '访问被拒绝，未提供令牌' });
+  }
   if (req.user.role !== 'admin') {
     return res.status(403).json({ message: '访问被拒绝，需要管理员权限' });
   }
